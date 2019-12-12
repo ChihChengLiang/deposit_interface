@@ -73,7 +73,7 @@
                         } else {
                             let tx_hash = result.result;
                             log("Waiting transaction, see ");
-                            log_url(`https://goerli.etherscan.io/tx/${tx_hash}`);
+                            log_url(`https://goerli.etherscan.io/tx/${tx_hash}`, undefined, true);
                         }
                     })
                 })
@@ -107,7 +107,7 @@
             element.textContent = text;
             document.querySelector("#logbox").appendChild(element);
         }
-        function log_url(href, text) {
+        function log_url(href, text, new_tab) {
             let element = document.createElement("p");
             let a = document.createElement("a");
             a.href = href;
@@ -116,6 +116,7 @@
             } else {
                 a.textContent = href;
             }
+            if (new_tab === true) a.target = "_blank"
             element.appendChild(a);
             document.querySelector("#logbox").appendChild(element);
         }
