@@ -10,6 +10,8 @@
     <button id="SubmitButton" type="submit">Submit Deposit</button>
     <div id="logbox"></div>
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+
         const NETWORK = "5";
         const NETWORK_NAME = "Goerli Test Network";
         const DEPOSIT_CONTRACT = urlParams.get('contract') || "0xbC2F8146F44fDCf37d341AE6C67b07546C0D1979";
