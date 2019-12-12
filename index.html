@@ -5,8 +5,9 @@
 </head>
 
 <body>
-    <textarea rows="10" cols="100" id="deposit_input" ></textarea>
-    <br/>
+    <h3 id="ContractAddress">Deposit Contract Address</h3>
+    <textarea rows="10" cols="100" id="deposit_input"></textarea>
+    <br />
     <button id="SubmitButton" type="submit">Submit Deposit</button>
     <div id="logbox"></div>
     <script>
@@ -35,6 +36,8 @@
             let value = document.querySelector("#deposit_input").value;
             validate_and_send(value);
         });
+
+        document.querySelector("#ContractAddress").textContent = `Deposit Contract Address: ${DEPOSIT_CONTRACT}`;
 
         function checkNetwork() {
             if (window.ethereum.networkVersion !== NETWORK) {
