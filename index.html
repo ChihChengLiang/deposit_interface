@@ -1,0 +1,120 @@
+<html>
+
+<head>
+    <title>Become a validator</title>
+</head>
+
+<body>
+    <textarea rows="10" cols="100" id="deposit_input" ></textarea>
+    <br/>
+    <button id="SubmitButton" type="submit">Submit Deposit</button>
+    <div id="logbox"></div>
+    <script>
+        const NETWORK = "5";
+        const NETWORK_NAME = "Goerli Test Network";
+        const DEPOSIT_CONTRACT = urlParams.get('contract') || "0xbC2F8146F44fDCf37d341AE6C67b07546C0D1979";
+        const DEPOSIT_AMOUNT_ETH = "3.2";
+        const GAS_LIMIT = "4000000";
+        const DEPOSIT_DATA_BYTES = 420;
+
+        if (typeof window.ethereum !== 'undefined') {
+            ethereum.on('networkChanged', function (accounts) {
+                checkNetwork()
+            })
+
+            checkNetwork()
+        } else {
+            console.error("No metamask detected!")
+            log_error("Metamask is not installed.")
+            log_url("https://metamask.io", "Get Metamask")
+        }
+
+        document.querySelector("#SubmitButton").addEventListener("click", (e) => {
+            let value = document.querySelector("#deposit_input").value;
+            validate_and_send(value);
+        });
+
+        function checkNetwork() {
+            if (window.ethereum.networkVersion !== NETWORK) {
+                log_error(`Please set Metamask to use ${NETWORK_NAME}.`)
+            }
+        }
+
+        function send_tx(deposit_data) {
+            // Need to update the new API interface Q1 2020 
+            // See https://metamask.github.io/metamask-docs/API_Reference/Ethereum_Provider
+            const ethereum = window.ethereum;
+            let wei = web3.toWei(DEPOSIT_AMOUNT_ETH);
+
+            ethereum.enable()
+                .then(function (accounts) {
+                    let params = [{
+                        "from": accounts[0],
+                        "to": DEPOSIT_CONTRACT,
+                        "gas": web3.toHex(GAS_LIMIT),
+                        "value": web3.toHex(wei),
+                        "data": deposit_data
+                    }]
+
+                    ethereum.sendAsync({
+                        method: 'eth_sendTransaction',
+                        params: params,
+                        from: accounts[0],
+                    }, function (err, result) {
+                        if (err !== null) {
+                            log_error(`${err.message} Please reload the window and try again.`)
+                            log_url("", "Reload");
+                        } else {
+                            let tx_hash = result.result;
+                            log("Waiting transaction, see ");
+                            log_url(`https://goerli.etherscan.io/tx/${tx_hash}`);
+                        }
+                    })
+                })
+                .catch(function (error) {
+                    log_error("Unable to get Metamask accounts. Reload page to try again.")
+                    log_url("", "Reload")
+                })
+
+        }
+
+        function validate_and_send(data) {
+            const data_length = DEPOSIT_DATA_BYTES * 2 + 2
+            if (data.startsWith("0x")) {
+                if (data.length === data_length) {
+                    send_tx(data)
+                } else {
+                    log_error(`Invalid deposit data. Expect data have ${data_length} bytes, got ${data.length} bytes.`)
+                }
+            } else {
+                log_error("Invalid deposit data. Did not start with 0x.")
+            }
+        }
+
+        function log_error(text) {
+            let element = document.createElement("p");
+            element.textContent = text;
+            document.querySelector("#logbox").appendChild(element);
+        }
+        function log(text) {
+            let element = document.createElement("p");
+            element.textContent = text;
+            document.querySelector("#logbox").appendChild(element);
+        }
+        function log_url(href, text) {
+            let element = document.createElement("p");
+            let a = document.createElement("a");
+            a.href = href;
+            if (text !== undefined) {
+                a.textContent = text;
+            } else {
+                a.textContent = href;
+            }
+            element.appendChild(a);
+            document.querySelector("#logbox").appendChild(element);
+        }
+
+    </script>
+</body>
+
+</html>
